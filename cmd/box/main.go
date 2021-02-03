@@ -29,12 +29,13 @@ func main() {
 
 	ghToken := os.Getenv("GH_TOKEN")
 	ghUsername := os.Getenv("GH_USER")
-	gistID := os.Getenv("GIST_ID")
+	gistID4Total := os.Getenv("GIST_ID_FOT_TOTAL")
+	gistID4Recent := os.Getenv("GIST_ID_FOT_RECENT")
 
-	steamOption := "ALLTIME" // options for types of games to list: RECENT (recently played games), ALLTIME <default> (playtime of games in descending order)
-	if os.Getenv("STEAM_OPTION") != "" {
-		steamOption = os.Getenv("STEAM_OPTION")
-	}
+	// steamOption := "ALLTIME" // options for types of games to list: RECENT (recently played games), ALLTIME <default> (playtime of games in descending order)
+	// if os.Getenv("STEAM_OPTION") != "" {
+	// 	steamOption = os.Getenv("STEAM_OPTION")
+	// }
 
 	multiLined := false // boolean for whether hours should have their own line - YES = true, NO = false
 	if os.Getenv("MULTILINE") != "" {
@@ -43,7 +44,7 @@ func main() {
 			multiLined = true
 		}
 	}
-	
+
 	updateOption := os.Getenv("UPDATE_OPTION") // options for update: GIST (Gist only), MARKDOWN (README only), GIST_AND_MARKDOWN (Gist and README)
 	markdownFile := os.Getenv("MARKDOWN_FILE") // the markdown filename (e.g. MYFILE.md)
 
@@ -63,25 +64,16 @@ func main() {
 
 	var (
 		filename string
-		lines []string
+		lines    []string
 	)
 
-	if steamOption == "ALLTIME" {
-		filename = "🎮 Steam playtime leaderboard"
-		lines, err = box.GetPlayTime(ctx, steamID, multiLined, appIDList...)
-		if err != nil {
-			panic("GetPlayTime err:" + err.Error())
-		}
-	} else if steamOption == "RECENT" {
-		filename = "🎮 Recently played Steam games"
-		lines, err = box.GetRecentGames(ctx, steamID, multiLined)
-		if err != nil {
-			panic("GetRecentGames err:" + err.Error())
-		}
+	filename = "🎮 Steam playtime leaderboard"
+	lines, err = box.GetPlayTime(ctx, steamID, multiLined, appIDList...)
+	if err != nil {
+		panic("GetPlayTime err:" + err.Error())
 	}
-
 	if updateGist {
-		gist, err := box.GetGist(ctx, gistID)
+		gist, err := box.GetGist(ctx, gistID4Total)
 		if err != nil {
 			panic("GetGist err:" + err.Error())
 		}
@@ -91,16 +83,39 @@ func main() {
 		f.Content = github.String(strings.Join(lines, "\n"))
 		gist.Files[github.GistFilename(filename)] = f
 
-		err = box.UpdateGist(ctx, gistID, gist)
+		err = box.UpdateGist(ctx, gistID4Total, gist)
 		if err != nil {
 			panic("UpdateGist err:" + err.Error())
 		}
+
+	}
+	filename = "🎮 Recently played Steam games"
+	lines, err = box.GetRecentGames(ctx, steamID, multiLined)
+	if err != nil {
+		panic("GetRecentGames err:" + err.Error())
+	}
+	if updateGist {
+		gist, err := box.GetGist(ctx, gistID4Recent)
+		if err != nil {
+			panic("GetGist err:" + err.Error())
+		}
+
+		f := gist.Files[github.GistFilename(filename)]
+
+		f.Content = github.String(strings.Join(lines, "\n"))
+		gist.Files[github.GistFilename(filename)] = f
+
+		err = box.UpdateGist(ctx, gistID4Recent, gist)
+		if err != nil {
+			panic("UpdateGist err:" + err.Error())
+		}
+
 	}
 
 	if updateMarkdown && markdownFile != "" {
 		title := filename
 		if updateGist {
-			title = fmt.Sprintf(`#### <a href="https://gist.github.com/%s" target="_blank">%s</a>`, gistID, title)
+			title = fmt.Sprintf(`#### <a href="https://gist.github.com/%s" target="_blank">%s</a>`, gistID4Total, title)
 		}
 
 		content := bytes.NewBuffer(nil)
