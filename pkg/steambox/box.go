@@ -196,6 +196,9 @@ func getNameEmoji(id int, name string) string {
 		945360:  "🕵️‍♂️ ", // Among Us
 		1250410: "🛩️ ",    // Microsoft Flight Simulator
 		1091500: "🦾 ",     // Cyberpunk 2077
+		250820:  "🥽 ",     // steam vr
+		641960:  "🥊 ",     // box vr
+		381210:  "👹 ",     // dbd
 	}
 
 	if emoji, ok := nameEmojiMap[id]; ok {
