@@ -80,9 +80,6 @@ func main() {
 
 		f := gist.Files[github.GistFilename(filename)]
 
-		if len(lines) == 0 {
-			lines = append(lines, "No games played recently.")
-		}
 		f.Content = github.String(strings.Join(lines, "\n"))
 		gist.Files[github.GistFilename(filename)] = f
 
@@ -101,6 +98,10 @@ func main() {
 		gist, err := box.GetGist(ctx, gistID4Recent)
 		if err != nil {
 			panic("GetGist err:" + err.Error())
+		}
+
+		if len(lines) == 0 {
+			lines = append(lines, "No games played recently.")
 		}
 
 		f := gist.Files[github.GistFilename(filename)]
