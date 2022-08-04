@@ -213,6 +213,9 @@ func getNameEmoji(id int, name string) string {
 		381210:  "👹 ",     // dbd
 		1172470: "🔺 ",     // apex
 		489830:  "🐲 ",     // skyrim
+		1332010: "🐈 ",     // stray
+		1621690: "⛏ ",     // core keeper
+		1290000: "🧼 ",     // powerwash
 	}
 
 	if emoji, ok := nameEmojiMap[id]; ok {
