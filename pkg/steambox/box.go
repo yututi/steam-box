@@ -17,12 +17,13 @@ import (
 
 // Box defines the steam box.
 type Box struct {
-	steam  *steam.Client
-	github *github.Client
+	steam     *steam.Client
+	github    *github.Client
+	ignoreIds []int
 }
 
 // NewBox creates a new Box with the given API key.
-func NewBox(apikey string, ghUsername, ghToken string) *Box {
+func NewBox(apikey string, ghUsername, ghToken string, ignoreIds []int) *Box {
 	box := &Box{}
 	box.steam = steam.NewClient(apikey, nil)
 	tp := github.BasicAuthTransport{
@@ -31,6 +32,8 @@ func NewBox(apikey string, ghUsername, ghToken string) *Box {
 	}
 
 	box.github = github.NewClient(tp.Client())
+
+	box.ignoreIds = ignoreIds
 
 	return box
 
@@ -78,6 +81,10 @@ func (b *Box) GetPlayTime(ctx context.Context, steamID uint64, multiLined bool, 
 			break
 		}
 
+		if Contains(b.ignoreIds, game.Appid) {
+			continue
+		}
+
 		hours := int(math.Floor(float64(game.PlaytimeForever / 60)))
 		mins := int(math.Floor(float64(game.PlaytimeForever % 60)))
 
@@ -111,8 +118,13 @@ func (b *Box) GetRecentGames(ctx context.Context, steamID uint64, multiLined boo
 	var max = 0
 
 	for _, game := range gameRet.Games {
+
 		if max >= 5 {
 			break
+		}
+
+		if Contains(b.ignoreIds, game.Appid) {
+			continue
 		}
 
 		if game.Name == "" {
@@ -212,4 +224,13 @@ func getNameEmoji(id int, name string) string {
 	}
 
 	return "🎮 " + name
+}
+
+func Contains(s []int, e int) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

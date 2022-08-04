@@ -31,6 +31,7 @@ func main() {
 	ghUsername := os.Getenv("GH_USER")
 	gistID4Total := os.Getenv("GIST_ID_FOT_TOTAL")
 	gistID4Recent := os.Getenv("GIST_ID_FOT_RECENT")
+	ignoreIdsRaw := os.Getenv("IGNORE_APP_ID_LIST")
 
 	// steamOption := "ALLTIME" // options for types of games to list: RECENT (recently played games), ALLTIME <default> (playtime of games in descending order)
 	// if os.Getenv("STEAM_OPTION") != "" {
@@ -58,7 +59,17 @@ func main() {
 		updateGist = true
 	}
 
-	box := steambox.NewBox(steamAPIKey, ghUsername, ghToken)
+	ignoreStringIds := strings.Split(ignoreIdsRaw, ",")
+	ignoreIds := []int{}
+	for _, i := range ignoreStringIds {
+		j, err := strconv.Atoi(i)
+		if err != nil {
+			panic(err)
+		}
+		ignoreIds = append(ignoreIds, j)
+	}
+
+	box := steambox.NewBox(steamAPIKey, ghUsername, ghToken, ignoreIds)
 
 	ctx := context.Background()
 
